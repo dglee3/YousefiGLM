@@ -3,7 +3,6 @@ function [bigStruct, D, W, samps] = generateCovariates(datmat, includeWhisker)
 % Last update: 6/17/19
 
 % Change log:
-% 7/23/19 - Added line to remove irrelevant entry from first row of whisker_dat
 % 6/17/19 - Removed extra code for adding time-shifted feature vectors; old
 % code is now generateCovariates_defshift.m
 % 6/17/19 - Added Hilbert transform to extract phase, amplitude, and set
@@ -52,13 +51,8 @@ if exist(wdatmat,'file') == 2 && includeWhisker
     whiskerdat_available = 1;
     W = load(wdatmat);
     %     no_whiskers = W.no_whiskers;
-    
-    % Get rid of first entry in whisker_dat if it is not trial data
-    % Depends on five-character naming convention (jn029, cc001, etc.)
     whisker_dat = W.whisker_dat;
-        if ~contains(whisker_dat(1).filename,datmat(1:5))
-            whisker_dat(1) = [];
-        end
+    
     whiskSampRate = 500; % Sampling rate of whisker data, Hz
     lpcutoff = 15; % Hz, cutoff for lowpass whisker filter
     w_lp = lpcutoff*2*pi/whiskSampRate;
@@ -195,8 +189,7 @@ for c1ti = 1:length(cal.trial_info)
             
             % Import whisker data if available
             if whiskerdat_available
-                tRow_whisk = trialnum; % whisker_dat has blank info in first field; assuming all trials present in summary table are present in whisker file
-                % Make this use time stamps for more accurate matching
+                tRow_whisk = 1 + trialnum; % whisker_dat has blank info in first field; assuming all trials present in summary table are present in whisker file
                 
                 % Grab relevant data
                 touchVec = whisker_dat(tRow_whisk).touch_vector;
